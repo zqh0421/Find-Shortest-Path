@@ -114,7 +114,8 @@ class MainWindow(QMainWindow):
         self.searchDirection = self.ui.boxDirection.currentIndex()
 
     def setHeuristicWeight(self):
-        self.heuristicWeight = float(self.ui.lineEditWeight.text())
+        if self.ui.lineEditWeight.text() != "":
+            self.heuristicWeight = float(self.ui.lineEditWeight.text())
 
     def setHeuristicMethod(self):
         self.heuristicMethod = self.ui.boxHeuristicMethod.itemText(self.ui.boxHeuristicMethod.currentIndex())
