@@ -111,7 +111,8 @@ class MainWindow(QMainWindow):
         self.ui.buttonPlay.setEnabled(state)
         self.ui.buttonClearAll.setEnabled(state)
         self.ui.buttonClearPath.setEnabled(state)
-        self.ui.lineEditMaxDepth.setEnabled(state)
+        if self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex()) == "Depth-First Search":
+            self.ui.lineEditMaxDepth.setEnabled(state)
         if self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex()) == "A-Star Search":
             self.ui.lineEditWeight.setEnabled(state)
             self.ui.boxHeuristicMethod.setEnabled(state)
