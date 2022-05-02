@@ -20,6 +20,7 @@ class MainWindow(QMainWindow):
         self.isWallsCleared = True
         self.heuristicWeight = 1
         self.heuristicMethod = "Manhattan"
+        self.maxDepth = 400
 
         self.initialSlider()  # 演示速度设定
         self.initialSignal()  # 信号初始化
@@ -30,8 +31,11 @@ class MainWindow(QMainWindow):
     def initialUI(self):
         self.ui.setupUi(self)
         self.setWindowTitle("Shortest Path Finding Algorithms")
-        self.ui.checkShortest.setEnabled(False)
-        self.ui.checkShortest.setChecked(False)
+        validator = QIntValidator()
+        validator.setRange(0, 400)
+        self.ui.lineEditMaxDepth.setValidator(validator)
+        self.ui.lineEditMaxDepth.setEnabled(False)
+        self.ui.lineEditMaxDepth.setText("")
         self.ui.lineEditWeight.setEnabled(False)
         self.ui.lineEditWeight.setText("0")
         validator = QDoubleValidator()
@@ -55,7 +59,9 @@ class MainWindow(QMainWindow):
         self.ui.boxData.currentIndexChanged.connect(self.readyToPlay)
         # enabled设置（algorithm）
         self.ui.boxAlgorithm.currentIndexChanged.connect(self.readyToPlay)
-        self.ui.boxAlgorithm.currentIndexChanged.connect(self.checkShortest)
+        self.ui.boxAlgorithm.currentIndexChanged.connect(self.checkMaxDepth)
+        # 改变搜索的最大深度
+        self.ui.lineEditMaxDepth.textChanged.connect(self.setMaxDepth)
         # 是否支持对角线前进
         self.ui.checkDiagonal.clicked.connect(self.isDiagonal)
         # 搜索方向from start/end
@@ -105,8 +111,7 @@ class MainWindow(QMainWindow):
         self.ui.buttonPlay.setEnabled(state)
         self.ui.buttonClearAll.setEnabled(state)
         self.ui.buttonClearPath.setEnabled(state)
-        if self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex()) == "Depth-First Search":
-            self.ui.checkShortest.setEnabled(state)
+        self.ui.lineEditMaxDepth.setEnabled(state)
         if self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex()) == "A-Star Search":
             self.ui.lineEditWeight.setEnabled(state)
             self.ui.boxHeuristicMethod.setEnabled(state)
@@ -140,17 +145,19 @@ class MainWindow(QMainWindow):
         else:
             self.neighborNumber = 4
 
-    def checkShortest(self):
+    def checkMaxDepth(self):
         message = self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex())
-        if message == "- Select -":
-            self.ui.checkShortest.setEnabled(False)
-            self.ui.checkShortest.setChecked(False)
-        elif message == "Depth-First Search":
-            self.ui.checkShortest.setEnabled(True)
-            self.ui.checkShortest.setChecked(False)
+        if message == "Depth-First Search":
+            self.ui.lineEditMaxDepth.setEnabled(True)
         else:
-            self.ui.checkShortest.setEnabled(False)
-            self.ui.checkShortest.setChecked(True)
+            self.ui.lineEditMaxDepth.setEnabled(False)
+            self.ui.lineEditMaxDepth.setText("")
+
+    def setMaxDepth(self):
+        if self.ui.lineEditMaxDepth.text() != "":
+            self.maxDepth = int(self.ui.lineEditMaxDepth.text())
+        else:
+            self.maxDepth = 400
 
     def readyToPlay(self):
         m1 = self.ui.boxAlgorithm.itemText(self.ui.boxAlgorithm.currentIndex())
