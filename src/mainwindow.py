@@ -1,5 +1,8 @@
+import queue
+
 from src.config import *
 from ui.uisettings import Ui_Widgets
+from queue import *
 
 
 class MainWindow(QMainWindow):
@@ -18,7 +21,7 @@ class MainWindow(QMainWindow):
         self.isClearing = False
         self.isPathCleared = True
         self.isWallsCleared = True
-        self.heuristicWeight = 1
+        self.heuristicWeight = 100
         self.heuristicMethod = "Manhattan"
         self.maxDepth = 400
 
@@ -421,28 +424,29 @@ class MainWindow(QMainWindow):
         else:
             s = self.endNode.copy()
             e = self.startNode.copy()
-        priorityQueue = [(s, 0, s.x * COL + s.y)]
+        pq = queue.PriorityQueue()
+        pq.put_nowait((0, s.x * COL + s.y,  s))
         visited = {(s.x, s.y)}
-        while len(priorityQueue):
-            priorityQueue = sortMin(priorityQueue)
-            # 从优先队列q中删除第一个状态，称之为cur
-            u = priorityQueue[0][0]
-            priorityQueue.remove(priorityQueue[0])
+        print(1)
+        while not pq.empty():
+            # 从优先队列q中删除第一个状态，称之为u
+            (priority, order, u) = pq.get()  # (启发式距离, 节点序号, 节点)
+            print(u.x, u.y)
             # 到达终点
             if (u.x, u.y) == (e.x, e.y):
                 #  打印数据
                 tok = time.perf_counter()
                 self.printData(len(visited), u.step, tok - tik)
                 print(f"Path is found!")
-                for i in range(len(priorityQueue)):  # 清空队列并更新visited颜色标记
-                    w = priorityQueue[i][0]
+                while not pq.empty():  # 清空队列并更新visited颜色标记
+                    (priority, order, w) = pq.get()
                     if (w.x, w.y) != (s.x, s.y) and (w.x, w.y) != (e.x, e.y):
                         self.paint(w.y * SQUARE_SIZE, w.x * SQUARE_SIZE, VISITED_COLOR)
                 return self.backtrace(u.parent)
             # 对过程结点进行标记
             if (u.x, u.y) != (s.x, s.y) and (u.x, u.y) != (e.x, e.y):
                 self.paint(u.y * SQUARE_SIZE, u.x * SQUARE_SIZE, VISITED_COLOR, True)  # visited
-            # 生成cur的所有子状态near
+            # 生成u的所有子状态near
             for i in range(self.neighborNumber):
                 near = u.copy()
                 near.x = u.x + H[i]
@@ -454,9 +458,9 @@ class MainWindow(QMainWindow):
                         near.step = newStep
                         visited.add((near.x, near.y))
                         near.parent = u
-                        np1 = near.x * COL + near.y
-                        np2 = near.step + self.heuristicWeight + heuristic(near, e, self.heuristicMethod)
-                        priorityQueue.append((near, np1, np2))
+                        order = near.x * COL + near.y
+                        priority = near.step + self.heuristicWeight * heuristic(near, e, self.heuristicMethod)
+                        pq.put_nowait((priority, order, near))
                         if (near.x, near.y) != (s.x, s.y) and (near.x, near.y) != (e.x, e.y):
                             self.paint(near.y * SQUARE_SIZE, near.x * SQUARE_SIZE, PROCESSING_COLOR, True)
         print(f"Path does not exist!")
