@@ -74,20 +74,6 @@ def readSampleData(message):
     return matrix
 
 
-def sortMin(pq):
-    index = 0
-    for i in range(1, len(pq)):
-        if pq[i][1] < pq[index][1]:
-            index = i
-        elif pq[i][1] == pq[index][1]:
-            if pq[i][2] < pq[index][2]:
-                index = i
-        temp = pq[0]
-        pq[0] = pq[index]
-        pq[index] = temp
-    return pq
-
-
 def moveCost(i):
     if i < 4:
         return 1.0
